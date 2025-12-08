@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shut The Box - Web Edition</title>
+    <link rel="stylesheet" href="style.css"> 
+</head>
+<body>
+    <div id="game-container">
+        
+        <div id="header-actions">
+            <button id="neustart-button" class="secondary-action">Neustart</button>
+        </div>
+        
+        <div id="status-panel">
+            <h2 id="spieler-label">Spieler 1 ist dran (Runde 1)</h2>
+            <p id="gesamtpunkte-label">Gesamtpunkte: 45</p>
+            <p id="highscore-label" style="display: none;">Strafpunkte: 0</p>
+            <p id="runden-label">Abgeschlossene Runden: 0</p>
+        </div>
+
+        <div id="dice-area">
+            <div class="dice-summe" id="summe-label">Summe: 0</div>
+            <img id="wuerfel-1" class="dice-image" src="resources/wuerfel_1.png" alt="Würfel 1" style="display: none;">
+            <img id="wuerfel-2" class="dice-image" src="resources/wuerfel_1.png" alt="Würfel 2" style="display: none;">
+        </div>
+
+        <div id="numbers-area">
+            </div>
+
+        <div id="actions-area">
+            <button id="wuerfeln-button">Würfeln</button>
+            <button id="bestaetigen-button" disabled>Zug bestätigen</button>
+        </div>
+        
+        <div id="highscore-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3 id="modal-title">Spiel beendet!</h3>
+                <pre id="modal-message"></pre>
+                <p>Möchtest du ein neues Spiel starten?</p>
+                <div class="modal-buttons">
+                    <button id="modal-neustart-ja" class="modal-primary">Ja</button>
+                    <button id="modal-neustart-nein" class="modal-secondary">Nein</button>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
