@@ -224,7 +224,7 @@ function initGame() {
 
     let spielmodus;
     while (true) {
-        const input = prompt("Wähle den Spielmodus:\n0: Standard\n1: Highscore (100 Punkte)\n2: Ok / Ende", "0");
+        const input = prompt("Wähle den Spielmodus:\n0: Standard\n1: Highscore (100 Punkte)\n2: Bestätigen / Beenden", "0");
         spielmodus = parseInt(input);
         if (spielmodus >= 0 && spielmodus <= 2) break;
         if (input === null) return; 
@@ -237,7 +237,7 @@ function initGame() {
     mussWuerfeln = true; 
 
     document.getElementById('highscore-label').style.display = (spielmodus === 1 || spielmodus === 2) ? 'block' : 'none';
-    document.getElementById('bestaetigen-button').textContent = (spielmodus === 2) ? "Ok / Ende" : "Zug bestätigen";
+    document.getElementById('bestaetigen-button').textContent = (spielmodus === 2) ? "Bestätigen / Beenden" : "Zug bestätigen";
     
     document.getElementById('wuerfeln-button').disabled = false;
     document.getElementById('neustart-button').disabled = false;
