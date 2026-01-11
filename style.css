@@ -82,8 +82,11 @@ body {
 .number-tile.selected {
     background-color: gold !important;
     color: black;
-    border: 3px solid white;
+    /* border: 3px solid white;  <-- Das verursacht das Springen */
+    outline: 3px solid white;   /* <-- Das hält alles an Ort und Stelle */
+    outline-offset: -3px;       /* Optional: Damit der Rahmen innen liegt */
 }
+
 
 #actions-area {
     display: flex;
@@ -170,4 +173,76 @@ body {
 .modal-secondary {
     background-color: darkred;
     color: white;
+}
+
+.notification-area {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 2000;
+    pointer-events: none; /* Man kann durch die Meldung hindurchklicken */
+}
+
+.notification-toast {
+    background-color: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    border-left: 4px solid #007bff;
+    font-size: 14px;
+    margin-bottom: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    animation: fadeInOut 4s forwards;
+    white-space: nowrap;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateX(-20px); }
+    10% { opacity: 1; transform: translateX(0); }
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-20px); }
+}
+
+
+@media screen and (orientation: landscape) {
+    #spieler-label {
+        font-size: 13px !important;
+        margin: 5px 0 !important;
+    }
+
+    #neustart-button {
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        width: auto;
+        padding: 5px 10px !important;
+        font-size: 12px !important;
+        z-index: 100;
+    }
+
+    #wuerfeln-button, #bestaetigen-button {
+        height: 35px !important;
+        padding: 0 15px !important; /* Polsterung reduziert */
+        font-size: 12px !important;
+    }
+
+    #gesamtpunkte-label, #runden-label {
+        font-size: 11px !important;
+        margin: 0 !important;
+    } /* Hier war die fehlende Klammer in deinem Entwurf */
+
+    .dice-image {
+        width: 70px !important;  /* Schön klein für Querformat */
+        height: 70px !important;
+        margin: 0 5px !important;
+    }
+
+    #dice-area {
+        height: 75px !important; 
+        margin: 15px 0 !important;
+    }
+    
+    .dice-summe {
+        font-size: 12px !important;
+    }
 }

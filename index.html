@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Shut The Box - Web Edition</title>
-    <link rel="stylesheet" href="style.css"> 
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
+    <div id="game-notification" class="notification-area"></div>
+    
     <div id="game-container">
         
         <div id="header-actions">
@@ -22,8 +24,8 @@
 
         <div id="dice-area">
             <div class="dice-summe" id="summe-label">Summe: 0</div>
-            <img id="wuerfel-1" class="dice-image" src="resources/wuerfel_1.png" alt="Würfel 1" style="display: none;">
-            <img id="wuerfel-2" class="dice-image" src="resources/wuerfel_1.png" alt="Würfel 2" style="display: none;">
+            <img id="wuerfel-1" class="dice-image" src="wuerfel_1.png" alt="Würfel 1" style="display: none;">
+            <img id="wuerfel-2" class="dice-image" src="wuerfel_1.png" alt="Würfel 2" style="display: none;">
         </div>
 
         <div id="numbers-area">
@@ -48,6 +50,6 @@
         
     </div>
 
-    <script src="game.js"></script>
+    <script type="text/javascript" src="game.js"></script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 // =================================================================
 
 class ShutTheBoxGame {
-    constructor(anzahlSpieler, spielmodus = 0) {
+    constructor(anzahlSpieler, spielmodus = 0, istGegenCpu = false) { // Parameter hinzugefügt
         this.spielerAnzahl = anzahlSpieler;
         this.spielmodus = spielmodus;
         this.spielerZustaende = {};
@@ -25,8 +25,8 @@ class ShutTheBoxGame {
         this.wuerfel2 = 0;
         this.summe = 0;
 
-        this.istCpuSpielFlag = (anzahlSpieler === 2); 
-        this.cpuSpielerId = this.istCpuSpielFlag ? 2 : 0;
+        this.istCpuSpielFlag = istGegenCpu; 
+        this.cpuSpielerId = istGegenCpu ? 2 : 0;
     }
 
     istAktuellerSpielerCPU() {
@@ -206,21 +206,26 @@ function showDice() {
     
     wuerfel1Img.style.display = 'inline-block';
     wuerfel2Img.style.display = 'inline-block';
-    wuerfel1Img.src = `resources/wuerfel_${game.wuerfel1}.png`; 
-    wuerfel2Img.src = `resources/wuerfel_${game.wuerfel2}.png`;
+    wuerfel1Img.src = `wuerfel_${game.wuerfel1}.png`; 
+    wuerfel2Img.src = `wuerfel_${game.wuerfel2}.png`;
     summeLabel.textContent = `Summe: ${game.summe}`;
 }
 
 function initGame() {
-    let anzahlSpieler;
-    while (true) {
-        const input = prompt("Wähle die Anzahl der menschlichen Spieler (1-4). 1 startet mit CPU.", "1");
-        anzahlSpieler = parseInt(input);
-        if (anzahlSpieler >= 1 && anzahlSpieler <= 4) break;
-        if (input === null) return; 
-    }
+    let input = prompt("Wähle die Anzahl der menschlichen Spieler (1-4). 1 startet mit CPU.", "1");
+    if (input === null) return;
+    let anzahl = parseInt(input);
 
-    let spielerAnzahlReal = anzahlSpieler === 1 ? 2 : anzahlSpieler;
+    let spielerAnzahlReal;
+    let gegenCpu = false;
+
+    if (anzahl === 1) {
+        spielerAnzahlReal = 2;
+        gegenCpu = true;
+    } else {
+        spielerAnzahlReal = anzahl;
+        gegenCpu = false;
+    }
 
     let spielmodus;
     while (true) {
@@ -230,7 +235,7 @@ function initGame() {
         if (input === null) return; 
     }
     
-    game = new ShutTheBoxGame(spielerAnzahlReal, spielmodus);
+    game = new ShutTheBoxGame(spielerAnzahlReal, spielmodus, gegenCpu);
 
     // Globale Zustände zurücksetzen
     gewaehlteZahlenTemp = [];
@@ -274,6 +279,8 @@ function updateUI(isNewRound = false) {
     const aktuelleZahlen = game.getAktuelleZahlen();
     const gesamtpunkte = aktuelleZahlen.reduce((a, b) => a + b, 0);
     const rundenAktuell = game.rundenGespielt[game.aktuellerSpieler];
+    
+    
     
     let spielerName;
     // ✅ KORRIGIERT: Zeigt "Computer" an, wenn die CPU am Zug ist
@@ -343,7 +350,8 @@ function handleNumberClick(zahl) {
         if (aktuelleSumme + zahl <= game.summe) {
             gewaehlteZahlenTemp.push(zahl);
         } else {
-            alert(`Ungültige Auswahl! Die Summe darf ${game.summe} nicht überschreiten.`);
+            // ERSETZT: Zeigt die Fehlermeldung oben links an
+            zeigeInfo(`Limit: Max. Summe ${game.summe}!`);
         }
     } else {
         gewaehlteZahlenTemp.splice(index, 1);
@@ -352,6 +360,25 @@ function handleNumberClick(zahl) {
     updateUI();
 }
 
+// Hilfsfunktion für Meldungen oben links
+function zeigeInfo(text) {
+    const area = document.getElementById('game-notification');
+    if (!area) return; // Sicherheit, falls HTML noch nicht da ist
+
+    const toast = document.createElement('div');
+    toast.className = 'notification-toast';
+    toast.textContent = text;
+    
+    area.appendChild(toast);
+    
+    // Nach 4 Sekunden automatisch entfernen
+    setTimeout(() => {
+        toast.remove();
+    }, 4000);
+}
+
+// =================================================================
+// =================================================================
 // =================================================================
 // 3. Aktionen und Haupt-Ablauf
 // =================================================================
@@ -363,47 +390,49 @@ function wuerfelnUndAnzeigen() {
     mussWuerfeln = false;
     gewaehlteZahlenTemp = [];
     
+    showDice(); 
+    updateUI(); 
+
     if (!game.istZugMoeglich()) {
-        alert("Kein Zug möglich! Runde wird beendet.");
-        wechselSpielerUndStarteNeueRunde(true); 
+        zeigeInfo(`Gewürfelt: ${game.wuerfel1}+${game.wuerfel2}. Kein Zug möglich!`);
+        setTimeout(() => {
+            wechselSpielerUndStarteNeueRunde(true);
+        }, 1500); 
         return;
     }
-    
-    updateUI();
 }
 
 function bestaetigeZug() {
     if (mussWuerfeln) return;
     
     if (game.spielmodus === 2 && gewaehlteZahlenTemp.length === 0) {
-        // ✅ NEU: Rufe benutzerdefiniertes Modal auf
         zeigeBestätigungsModal();
         return;
     }
 
     if (game.istGueltigerZug(gewaehlteZahlenTemp)) {
-        
         for (const zahl of gewaehlteZahlenTemp) {
             game.klappeZahlUm(zahl);
         }
         gewaehlteZahlenTemp = [];
         
         if (game.getAktuelleZahlen().length === 0) {
-            alert("Box geschlossen! Bonusrunde!");
-            wechselSpielerUndStarteNeueRunde(true);
+            zeigeInfo("Box geschlossen! Bonusrunde!");
+            setTimeout(() => wechselSpielerUndStarteNeueRunde(true), 1200);
         } else {
             mussWuerfeln = true;
-            // **NEU:** Würfel ausblenden, bevor die nächste Runde startet
             hideDice(); 
-            alert("Zug erfolgreich. Erneut würfeln!");
+            zeigeInfo("Zug ok! Würfle erneut.");
             updateUI();
         }
     } else {
-        alert(`Ungültiger Zug! Die Summe der gewählten Zahlen muss ${game.summe} ergeben.`);
+        zeigeInfo("Falsche Summe gewählt!");
         gewaehlteZahlenTemp = [];
         updateUI();
     }
 }
+
+
 
 // ✅ NEU: Funktion zur Anzeige des Bestätigungs-Modals
 function zeigeBestätigungsModal() {
@@ -514,16 +543,14 @@ function zeigeHighscore() {
 }
 
 // =================================================================
-// 4. CPU-Ablauf (✅ ÜBERARBEITET FÜR VERZÖGERUNGEN UND WÜRFEL-AUSBLENDUNG)
+// =================================================================
+// =================================================================
+// 4. CPU-Ablauf (KORRIGIERT: Variablen hinzugefügt)
 // =================================================================
 
-// Kurze Verzögerung für den Start des CPU-Zuges
 const CPU_START_DELAY = 1000; 
-// Verzögerung zwischen Würfelwurf und Zug-Prüfung
 const CPU_ROLL_DELAY = 1500; 
-// Verzögerung nach dem Umklappen der Zahlen (Wartezeit, um den Zug zu sehen)
 const CPU_MOVE_DELAY = 1000; 
-// Verzögerung zwischen Zügen, wenn die CPU erneut würfeln darf
 const CPU_NEXT_ROLL_DELAY = 1500; 
 
 async function checkAndStartCPUTurn() {
@@ -535,7 +562,8 @@ async function checkAndStartCPUTurn() {
 }
 
 async function cpuZugAblauf() {
-    
+    if (!game || !game.istAktuellerSpielerCPU()) return;
+
     document.getElementById('wuerfeln-button').disabled = true;
     document.getElementById('bestaetigen-button').disabled = true;
     
@@ -544,72 +572,61 @@ async function cpuZugAblauf() {
     mussWuerfeln = false;
     gewaehlteZahlenTemp = [];
     
-    // 2. Würfel anzeigen (manuell, da updateUI für CPU deaktiviert wurde)
     showDice();
-    updateUI(); // Nur die Zahlen-Kacheln aktualisieren
+    updateUI(); 
 
-    // 3. Verzögern, damit der Spieler das Ergebnis sieht
     await new Promise(resolve => setTimeout(resolve, CPU_ROLL_DELAY)); 
 
     if (!game.istZugMoeglich()) {
-        // Keine Zugmöglichkeit: Kurze Pause, dann Runde beenden
-        await new Promise(resolve => setTimeout(resolve, CPU_ROLL_DELAY)); 
-        // ✅ NEU: Würfel ausblenden, bevor die Runde endet
+        zeigeInfo("Computer: Kein Zug möglich.");
+        await new Promise(resolve => setTimeout(resolve, 1000)); 
         hideDice(); 
         wechselSpielerUndStarteNeueRunde(true); 
         return;
     }
 
     while (true) {
+        if (!game || !game.istAktuellerSpielerCPU()) return;
         
         const kombination = game.findeBesteKombination();
         
         if (kombination.length > 0) {
-            
-            // 4. Zug wählen und markieren
+            // Zug markieren
             gewaehlteZahlenTemp = kombination;
             updateUI(); 
             
-            // 5. Verzögerung, damit der Spieler die gewählten Zahlen sieht
             await new Promise(resolve => setTimeout(resolve, CPU_MOVE_DELAY));
             
-            // 6. Zahlen umklappen
+            // Zahlen umklappen
             for (const zahl of kombination) {
                 game.klappeZahlUm(zahl);
             }
             gewaehlteZahlenTemp = [];
-            
-            // 7. Würfel ausblenden (wie bei menschlichem Spieler)
             hideDice(); 
-            updateUI(); // Nur die Zahlen-Kacheln aktualisieren
+            updateUI(); 
 
-            // 8. Kurze Verzögerung, während die Würfel ausgeblendet sind
             await new Promise(resolve => setTimeout(resolve, CPU_NEXT_ROLL_DELAY));
 
             if (game.getAktuelleZahlen().length === 0) {
-                // Box geschlossen
+                zeigeInfo("Computer hat die Box geschlossen!");
                 wechselSpielerUndStarteNeueRunde(true);
                 return; 
             } else {
                 // Erneut würfeln
                 game.wuerfeln();
-                mussWuerfeln = false;
-                showDice(); // Würfel wieder einblenden und Summe anzeigen
+                showDice();
                 updateUI();
                 
-                // 9. Verzögerung, um den neuen Wurf anzuzeigen
                 await new Promise(resolve => setTimeout(resolve, CPU_ROLL_DELAY)); 
                 
                 if (!game.istZugMoeglich()) {
-                    // Keine Zugmöglichkeit mehr nach erneutem Wurf
-                    await new Promise(resolve => setTimeout(resolve, CPU_ROLL_DELAY)); 
+                    zeigeInfo("Computer: Kein Zug mehr möglich.");
                     hideDice();
                     wechselSpielerUndStarteNeueRunde(true); 
                     return; 
                 }
             }
         } else {
-            // Kein Zug mehr möglich (fällt auf, wenn beim ersten Wurf ein Zug möglich war)
             hideDice();
             wechselSpielerUndStarteNeueRunde(true);
             return; 
@@ -617,17 +634,26 @@ async function cpuZugAblauf() {
     }
 }
 
-
 // =================================================================
-// 5. Event Listener (Verbindung zwischen UI und Logik)
+// 5. Event Listener
 // =================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Falls das Element noch nicht existiert, erstellen wir es sicherheitshalber hier
+    if (!document.getElementById('game-notification')) {
+        const div = document.createElement('div');
+        div.id = 'game-notification';
+        div.className = 'notification-area';
+        document.body.prepend(div);
+    }
+
     document.getElementById('wuerfeln-button').addEventListener('click', wuerfelnUndAnzeigen);
     document.getElementById('bestaetigen-button').addEventListener('click', bestaetigeZug);
     
-    // Korrektur: Bestätigungsmeldung beim Klick auf Neustart entfernt
     document.getElementById('neustart-button').addEventListener('click', () => {
+        game = null; 
+        hideDice();
+        document.getElementById('spieler-label').textContent = "Neues Spiel wird gestartet...";
         initGame();
     });
 
